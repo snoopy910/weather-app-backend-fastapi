@@ -6,6 +6,12 @@ from starlette.middleware.cors import CORSMiddleware
 from src.locations.router import router as locations_router
 from src.forecast.router import router as forecast_router
 from src.config import app_configs
+from src.database import Base, engine
+from src.models import Location
+
+print("Creating database ....")
+
+Base.metadata.create_all(engine)
 
 app = FastAPI(**app_configs)
 
