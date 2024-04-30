@@ -11,3 +11,6 @@ class Location(BaseModel):  # serializer
 
 class LocationsWithWeatherCondition(Location):
     current_weather_condition: object
+
+class City(BaseModel):
+    name: str

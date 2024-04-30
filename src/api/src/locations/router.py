@@ -3,7 +3,8 @@ from src.database import SessionLocal
 import src.models as models
 from fastapi import APIRouter, HTTPException, status
 
-from src.locations.schemas import Location, LocationsWithWeatherCondition
+from src.locations.schemas import Location, LocationsWithWeatherCondition, City
+from src.doc import hard_data, fields_to_select
 
 router = APIRouter()
 
@@ -17,7 +18,7 @@ def fetch_current(latitude, longitude):
         + str(latitude)
         + "&longitude="
         + str(longitude)
-        + "&current=temperature_2m,rain"
+        + "&current=temperature_2m,rain,weather_code"
     )
     weather_data = requests.get(api_url).json()
 
@@ -41,16 +42,26 @@ def get_all_locations():
 
 
 @router.post("/", response_model=Location, status_code=status.HTTP_201_CREATED)
-def create_an_location(location: Location):
-    db_location = db.query(models.Location).filter(models.Location.name == location.name).first()
+def create_location(location: City):
+    found_location = None
+    for hard_location in hard_data:
+        print(hard_location[fields_to_select[0]])
+        if hard_location[fields_to_select[0]] == location.name:
+            found_location = hard_location
+            break
+
+    if found_location is None:
+        raise HTTPException(status_code=400, detail="Provide detail with longitude and latitude")
+    
+    db_location = db.query(models.Location).filter(models.Location.name == found_location[fields_to_select[0]]).first()
 
     if db_location is not None:
         raise HTTPException(status_code=400, detail="Location already exists")
 
     new_location = models.Location(
-        name=location.name,
-        latitude=location.latitude,
-        longitude=location.longitude,
+        name=found_location[fields_to_select[0]],
+        latitude=found_location[fields_to_select[1]],
+        longitude=found_location[fields_to_select[2]],
     )
 
     db.add(new_location)

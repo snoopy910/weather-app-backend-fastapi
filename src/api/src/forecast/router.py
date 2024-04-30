@@ -15,7 +15,7 @@ def fetch_forecast(latitude, longitude):
         + str(longitude)
         + "&forecast_days="
         + str(7)
-        + "&daily=temperature_2m_max,temperature_2m_min"
+        + "&daily=temperature_2m_max,temperature_2m_min,weather_code"
     )
     weather_data = requests.get(api_url).json()
 
